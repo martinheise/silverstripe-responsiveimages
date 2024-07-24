@@ -1,0 +1,32 @@
+{
+    "name": "mhe/silverstripe-responsiveimages",
+    "description": "Silverstripe module to handle responsive images, auto-generating meaningful resolutions",
+    "type": "silverstripe-vendormodule",
+    "keywords": [
+        "silverstripe",
+        "CMS",
+        "image"
+    ],
+    "license": "BSD-3-Clause",
+    "authors": [
+        {
+            "name": "Martin Heise",
+            "email": "info@martinheise.de"
+        }
+    ],
+    "require": {
+        "php": "^8.0",
+        "ext-dom": "*",
+        "silverstripe/framework": "^4.0 || ^5.0",
+        "mhe/imagetools": "^1.0"
+    },
+    "require-dev": {
+        "phpunit/phpunit": "^9.5"
+    },
+    "autoload": {
+        "psr-4": {
+            "Mhe\\SmartImages\\": "src/",
+            "Mhe\\SmartImages\\Tests\\": "tests/"
+        }
+    }
+}

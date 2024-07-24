@@ -1,0 +1,25 @@
+---
+Name: smartimages
+Before: 'app'
+---
+
+# Add extension to both classes that use trait ImageManipulation
+
+SilverStripe\Assets\Image:
+  extensions:
+    - 'Mhe\SmartImages\Extensions\ImageExtension'
+
+SilverStripe\Assets\Storage\DBFile:
+  extensions:
+    - 'Mhe\SmartImages\Extensions\ImageExtension'
+
+Mhe\SmartImages\Extensions\ImageExtension:
+  rendering_classes:
+    default:
+      sizes: "(max-width: 1000px) 100vw, 1000px"
+      sizediff: 50000
+      retinalevel: 2
+      maxsteps: 5
+    fullWidth:
+      sizes: "100vw"
+      retinalevel: 2

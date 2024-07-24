@@ -1,0 +1,9 @@
+---
+Name: image-extension-cache
+---
+SilverStripe\Core\Injector\Injector:
+  Psr\SimpleCache\CacheInterface.MheImageExtension_variants:
+    factory: SilverStripe\Core\Cache\CacheFactory
+    constructor:
+      namespace: "MheImageExtension_variants"
+

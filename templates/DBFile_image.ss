@@ -1,0 +1,1 @@
+<% if $Src %><img src="$Src" class="$Cssclass" alt="$alt" <% if $Srcset %>srcset="$Srcset"<% end_if %> <% if $Sizes %>sizes="$Sizes"<% else_if $Userwidth %>style="width:{$Userwidth}px"<% else_if $Fallbackwidth %>width="{$Fallbackwidth}"<% end_if %> /><% end_if %>

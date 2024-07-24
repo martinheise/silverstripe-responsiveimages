@@ -1,0 +1,16 @@
+SilverStripe\Assets\Folder:
+  folder:
+    Title: folder
+SilverStripe\Assets\Image:
+  testimage1:
+    Title: Test image 1
+    FileFilename: folder/testimage1.jpg
+    FileHash: d4d40648f84e2e8d7280333b351628ea0acf84ee
+    Parent: =>SilverStripe\Assets\Folder.folder
+    Name: testimage1.jpg
+
+Page:
+  page1:
+    Content: '<p>Image: [image src="/assets/d4d40648f8/testimage1.jpg" id="2" width="600" height="180" class="leftAlone ss-htmleditorfield-file image" title="testimage1"] [image src="/assets/d4d40648f8/testimage1.jpg" id="2" width="600" height="180" class="small ss-htmleditorfield-file image"]</p>'
+  page2:
+    Content: '<p>Image: [image src="/assets/d4d40648f8/testimage1.jpg" id="2" width="300" height="90" class="userwidth ss-htmleditorfield-file image" title="testimage1"] [image src="/assets/d4d40648f8/testimage1.jpg" id="2" width="450" height="135" class="userwidth ss-htmleditorfield-file image" title="testimage1"]</p>'
