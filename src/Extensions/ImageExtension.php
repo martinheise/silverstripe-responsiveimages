@@ -223,6 +223,7 @@ class ImageExtension extends DataExtension implements Flushable
     private function invalidate()
     {
         $this->owner->setDynamicData('imageExtensionVariants', array());
+        $this->owner->setDynamicData('imageExtensionRenderConfig', array());
     }
 
     /**

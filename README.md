@@ -15,7 +15,7 @@ Calculation is based on the module [mhe/imagetools](https://github.com/martinhei
 
 ## Requirements
 
-Requires Silverstripe 5.x, still works with Silverstripe 4 – see respective branches `4` and `5`
+Requires Silverstripe 5.x – for a version compatible with Silverstripe 4 see respective branch `4`
 
 
 ## Installation and setup
