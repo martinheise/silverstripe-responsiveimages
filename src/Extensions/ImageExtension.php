@@ -97,7 +97,7 @@ class ImageExtension extends DataExtension implements Flushable
      */
     public function setArguments($arguments)
     {
-        $this->owner->setDynamicData('imageExtensionArguments', $this->parseArgString($arguments));
+        $this->owner->setField('imageExtensionArguments', $this->parseArgString($arguments));
         $this->invalidate();
         return $this->owner;
     }
@@ -107,7 +107,7 @@ class ImageExtension extends DataExtension implements Flushable
      */
     public function getArguments()
     {
-        $arguments = $this->owner->getDynamicData('imageExtensionArguments');
+        $arguments = $this->owner->imageExtensionArguments;
         return $arguments ?: [];
     }
 
@@ -222,7 +222,8 @@ class ImageExtension extends DataExtension implements Flushable
      */
     private function invalidate()
     {
-        $this->owner->setDynamicData('imageExtensionVariants', array());
+        $this->owner->setField('imageExtensionVariants', array());
+        $this->owner->setField('imageExtensionRenderConfig', array());
     }
 
     /**
@@ -233,7 +234,7 @@ class ImageExtension extends DataExtension implements Flushable
     private function getVariants()
     {
         // use cached variants if set already
-        $variants = $this->owner->getDynamicData('imageExtensionVariants');
+        $variants = $this->owner->imageExtensionVariants;
 
         // try to get from cache
         if (!is_array($variants) || (count($variants) == 0)) {
@@ -262,7 +263,7 @@ class ImageExtension extends DataExtension implements Flushable
                 $variants[] = $res->getSrcimage();
             }
             $this->toCache($variants);
-            $this->owner->setDynamicData('imageExtensionVariants', $variants);
+            $this->owner->setField('imageExtensionVariants', $variants);
         }
         return $variants;
     }
@@ -348,7 +349,7 @@ class ImageExtension extends DataExtension implements Flushable
      */
     private function getRenderConfig()
     {
-        $renderConfig = $this->owner->getDynamicData('imageExtensionRenderConfig');
+        $renderConfig = $this->owner->imageExtensionRenderConfig;
 
         // try to get from cache
         if (!$renderConfig) {
@@ -411,7 +412,7 @@ class ImageExtension extends DataExtension implements Flushable
             $cachekey = $this->getCacheBaseKey() . "_config";
             $this->getCache()->set($cachekey, $renderConfig);
 
-            $this->owner->setDynamicData('imageExtensionRenderConfig', $renderConfig);
+            $this->owner->setField('imageExtensionRenderConfig', $renderConfig);
         }
         return $renderConfig;
     }
