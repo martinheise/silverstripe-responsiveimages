@@ -2,7 +2,8 @@
 
 namespace Mhe\SmartImages\Tests\Extensions;
 
-use DOMDocument, DOMXPath;
+use DOMDocument;
+use DOMXPath;
 use Mhe\SmartImages\Extensions\ImageExtension;
 use Page;
 use SilverStripe\Assets\Dev\TestAssetStore;
