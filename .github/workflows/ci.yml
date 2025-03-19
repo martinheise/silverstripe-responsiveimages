@@ -13,4 +13,5 @@ jobs:
     uses: silverstripe/gha-ci/.github/workflows/ci.yml@v1
     permissions:
       pull-requests: read
-      contents: write
+      contents: read
+      actions: write
