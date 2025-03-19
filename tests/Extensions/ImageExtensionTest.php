@@ -80,6 +80,9 @@ class ImageExtensionTest extends SapphireTest
         parent::tearDown();
     }
 
+    /**
+     * Asserts that the scaled filename matches the expected result image width.
+     */
     protected function assertScaledFilename($expectsize, $filename, $name)
     {
         $filebase = '/assets/folder/' . static::$fixture_hashbase . '/';
