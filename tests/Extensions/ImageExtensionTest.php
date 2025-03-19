@@ -47,29 +47,29 @@ class ImageExtensionTest extends SapphireTest
                 'sizes' => '100vw',
                 'sizediff' => 10000,
                 'maxsteps' => 4,
-                'retinalevel' => 1
+                'highres' => 1
                 ),
             'maxsteps_90vw' => array(
                 'sizes' => '90vw',
                 'sizediff' => 1000,
                 'maxsteps' => 4,
-                'retinalevel' => 1
+                'highres' => 1
             ),
             'sizediff_90vw_2x' => array(
                 'sizes' => '90vw',
                 'sizediff' => 2000000,
                 'maxsteps' => 4,
-                'retinalevel' => 2
+                'highres' => 2
             ),
             'small' => array(
                 'sizes' => '120px',
                 'sizediff' => 50000,
-                'retinalevel' => 2
+                'highres' => 2
                 ),
             'userwidth' => array(
                 'sizes' => '(max-width:$USERWIDTHpx) calc(100vw - 80px), $USERWIDTHpx',
                 'sizediff' => 50000,
-                'retinalevel' => 1
+                'highres' => 1
                 )
             ));
     }
@@ -141,7 +141,7 @@ class ImageExtensionTest extends SapphireTest
         $widths = $image->VariantWidths();
 
         // don’t test all the sizes, but basically the limits
-        // maxsteps_90vw (no retina) > max 4 steps
+        // maxsteps_90vw (no highres) > max 4 steps
         // sizediff_90vw_2x > 2 widths
 
         $this->assertEquals(4, count($widths));
@@ -248,5 +248,21 @@ class ImageExtensionTest extends SapphireTest
         $this->assertGeneratedImgTagSrcset($imgtags[1], 1, [450]);
         $this->assertEquals('userwidth ss-htmleditorfield-file image', $imgtags[1]->getAttribute('class'));
         $this->assertEquals('(max-width:450px) calc(100vw - 80px), 450px', $imgtags[1]->getAttribute('sizes'));
+    }
+
+    public function testLegacyConfig()
+    {
+        Config::modify()->set(ImageExtension::class, 'rendering_classes', array(
+            'default' => array(),
+            'legacy' => array(
+                'sizes' => '100vw',
+                'sizediff' => 2000000,
+                'maxsteps' => 1,
+                'retinalevel' => 2
+            ),
+        ));
+        $image = $this->objFromFixture(Image::class, 'testimage1');
+        $res = $image->Rendering(array('cssclass' => 'legacy'));
+        $this->assertEquals([1200, 2400], $res->VariantWidths());
     }
 }
