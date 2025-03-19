@@ -123,7 +123,7 @@ class ImageExtensionTest extends SapphireTest
         $image = $this->objFromFixture(Image::class, 'testimage1');
         $this->assertScaledFilename(1200, $image->Src(), 'testimage1'); // maxvw
         $res = $image->Rendering(array('cssclass' => 'sizediff_90vw_2x'));
-        $this->assertScaledFilename(2160, $res->Src(), 'testimage1'); // = 90vw * retina2 * maxvw
+        $this->assertScaledFilename(1080, $res->Src(), 'testimage1'); // = 90vw * maxvw
     }
 
     public function testImageCssclass()
@@ -154,13 +154,13 @@ class ImageExtensionTest extends SapphireTest
 
         $res = $image->Rendering(array('cssclass' => 'sizediff_90vw_2x'));
         $widths = $res->VariantWidths();
-        $this->assertEquals([2160, 1080], $widths);
+        $this->assertEquals([1080, 2160], $widths);
 
         $res = $image->Rendering(array('cssclass' => 'small'));
-        $this->assertEquals([240, 120], $res->VariantWidths());
+        $this->assertEquals([120, 240], $res->VariantWidths());
 
         $res = $image->Rendering(array('cssclass' => 'small other-class'));
-        $this->assertEquals([240, 120], $res->VariantWidths());
+        $this->assertEquals([120, 240], $res->VariantWidths());
 
         $res = $image->Rendering(array('cssclass' => 'userwidth', 'userwidth' => 300));
         $this->assertEquals([300], $res->VariantWidths());
@@ -188,8 +188,8 @@ class ImageExtensionTest extends SapphireTest
 
         $res = $image->Rendering(array('cssclass' => 'small'));
         $files_expected = array(
+            '120' => 'testimage1__ScaleWidthWzEyMF0.jpg',
             '240' => 'testimage1__ScaleWidthWzI0MF0.jpg',
-            '120' => 'testimage1__ScaleWidthWzEyMF0.jpg'
         );
         $srcset_expected = "";
         foreach ($files_expected as $px => $name) {
@@ -212,7 +212,7 @@ class ImageExtensionTest extends SapphireTest
         $image = $image->Rendering(array('cssclass' => 'small'));
         $imgtags = $this->getImageTags($image->forTemplate());
         $this->assertEquals(1, count($imgtags));
-        $this->assertGeneratedImgTagSrcset($imgtags[0], 2, [240, 120]);
+        $this->assertGeneratedImgTagSrcset($imgtags[0], 2, [120, 240]);
         $this->assertEquals('small', $imgtags[0]->getAttribute('class'));
         $this->assertEquals('120px', $imgtags[0]->getAttribute('sizes'));
     }
@@ -229,7 +229,7 @@ class ImageExtensionTest extends SapphireTest
         $this->assertEquals('leftAlone ss-htmleditorfield-file image', $imgtags[0]->getAttribute('class'));
         $this->assertEquals('100vw', $imgtags[0]->getAttribute('sizes'));
 
-        $this->assertGeneratedImgTagSrcset($imgtags[1], 2, [240, 120]);
+        $this->assertGeneratedImgTagSrcset($imgtags[1], 2, [120, 240]);
         $this->assertEquals('small ss-htmleditorfield-file image', $imgtags[1]->getAttribute('class'));
         $this->assertEquals('120px', $imgtags[1]->getAttribute('sizes'));
     }
