@@ -6,9 +6,9 @@ class RenderConfig extends \Mhe\Imagetools\Data\RenderConfig
 {
     protected ?int $fallbackwidth;
 
-    public function __construct(string $sizes, int $maxsteps = 10, int $sizediff = 50000, int $retinalevel = 1, array $rendersizes = [], $fallbackwidth = null)
+    public function __construct(string $sizes, int $maxsteps = 10, int $sizediff = 50000, int $highres = 1, array $rendersizes = [], $fallbackwidth = null)
     {
-        parent::__construct($sizes, $maxsteps, $sizediff, $retinalevel, $rendersizes);
+        parent::__construct($sizes, $maxsteps, $sizediff, $highres, $rendersizes);
         $this->fallbackwidth = $fallbackwidth;
     }
 

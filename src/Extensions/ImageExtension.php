@@ -26,7 +26,7 @@ class ImageExtension extends DataExtension implements Flushable
             'sizes' => '100vw',
             'maxsteps' => 0,  // maxsteps is limiting the steps calculated by sizediff
             'sizediff' => 20000,
-            'retinalevel' => 2
+            'highres' => 2
         )
     );
 
@@ -391,10 +391,13 @@ class ImageExtension extends DataExtension implements Flushable
             if (!array_key_exists('sizediff', $config) && is_numeric($config['sizediff'])) {
                 $conf['sizediff'] = intval($config['sizediff']);
             }
-            if (!array_key_exists('retinalevel', $config) || !is_numeric($config['retinalevel'])) {
-                $config['retinalevel'] = 1;
+            if (array_key_exists('highres', $config) && is_numeric($config['highres'])) {
+                $config['highres'] = max(min(intval($config['highres']), 3), 1);
+            } elseif (array_key_exists('retinalevel', $config) && is_numeric($config['retinalevel'])) {
+                // legacy parameter
+                $config['highres'] = max(min(intval($config['retinalevel']), 3), 1);
             } else {
-                $config['retinalevel'] = max(min(intval($config['retinalevel']), 3), 1);
+                $config['highres'] = 1;
             }
             if (!array_key_exists('fallbackwidth', $config) || !is_numeric($config['fallbackwidth'])) {
                 $config['fallbackwidth'] = null;
@@ -404,7 +407,7 @@ class ImageExtension extends DataExtension implements Flushable
                 $config['sizes'] ?: '',
                 $config['maxsteps'],
                 $config['sizediff'],
-                $config['retinalevel'],
+                $config['highres'],
                 $config['rendersizes'],
                 $config['fallbackwidth']
             );

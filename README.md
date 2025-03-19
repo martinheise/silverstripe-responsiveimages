@@ -60,11 +60,11 @@ Mhe\SmartImages\Extensions\ImageExtension:
     default:
       sizes: "(max-width: 1000px) 100vw, 1000px"
       sizediff: 50000
-      retinalevel: 2
+      highres: 2
       maxsteps: 5
     fullWidth:
       sizes: "100vw"
-      retinalevel: 2      
+      highres: 2      
       # takes sizediff and maxsteps from "default" 
     smallThumbnail:
       sizes: "80px"
@@ -84,8 +84,9 @@ Also see the information in [Imagetools documentation](https://github.com/martin
 - `sizes`: Definition of responsive image sizes, possibly with media conditions. This is output directly as `sizes` attribute on the output `img` tag. I addition the extension uses this information to calculate which actual output sizes can occur and which image resolutions are appropriate.
 - `sizediff`: desired difference in filesize (bytes) between two resolutions. This is not an exact values, but a rough goal. Lower values mean possibly more different files generated and better adjustment to the responsive output, higher values reduce load on image generation. `maxsteps` parameter has priority, so the resolutions might be roughly distributed evenly with a bigger file size difference.
   - A special string "$USERWIDTH" can be used inside the value – in shortcode use it will be replaced with the source’s width attribute as set by the user, to enable images with variabel, user defined size.  
-- `maxsteps`: Limit the number of resolutions to create. If `retinalevel` is > 2, this value is practically multiplied.
-- `retinalevel`: (1, 2 or 3) Create additional levels of output resolution, etc. a 2x resolution of 2400px if the maximal layout size is 1200px
+- `maxsteps`: Limit the number of resolutions to create. If `highres` is > 2, this value is practically multiplied.
+- `highres`: (1, 2 or 3) Create additional levels of output resolution, etc. a 2x resolution of 2400px if the maximal layout size is 1200px
+- `retinalevel`: deprecated legacy parameter – use `highres` instead
 - `rendersizes`: Set the desired resolutions manually, ignoring the other parameters
 
 ### Recommended general Silverstripe configuration
