@@ -15,14 +15,14 @@ Calculation is based on the module [mhe/imagetools](https://github.com/martinhei
 
 ## Requirements
 
-Requires Silverstripe 5.x – for a version compatible with Silverstripe 4 see respective branch `4`
+Requires Silverstripe 6.x – for a version compatible with Silverstripe 5 see respective branch `5`
 
 
 ## Installation and setup
 
 Install with composer:
 
-    composer require mhe/silverstripe-responsiveimages ^1.0
+    composer require mhe/silverstripe-responsiveimages
 
 Perform `?flush`
 
