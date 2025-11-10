@@ -11,7 +11,7 @@ use SilverStripe\View\Parsers\ShortcodeParser;
 class ResponsiveImageShortcodeProvider extends ImageShortcodeProvider
 {
     /**
-     * Replace"[image id=n]" shortcode with an image reference.
+     * Replace "[image id=n]" shortcode with an image reference.
      * instead of the default ImageShortcodeProvider this implementation uses a template to render the Image object
      *
      * @param array $args Arguments passed to the parser
@@ -19,9 +19,9 @@ class ResponsiveImageShortcodeProvider extends ImageShortcodeProvider
      * @param ShortcodeParser $parser Parser
      * @param string $shortcode Name of shortcode used to register this handler
      * @param array $extra Extra arguments
-     * @return string Result of the handled shortcode
+     * @return ?string Result of the handled shortcode
      */
-    public static function handle_shortcode($args, $content, $parser, $shortcode, $extra = array())
+    public static function handle_shortcode($args, $content, $parser, $shortcode, $extra = array()): ?string
     {
         $cache = static::getCache();
         $cacheKey = static::getCacheKey($args);
