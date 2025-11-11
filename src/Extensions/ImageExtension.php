@@ -4,24 +4,30 @@ namespace Mhe\SmartImages\Extensions;
 
 use Mhe\SmartImages\Model\RenderConfig;
 use Mhe\Imagetools\ImageResizer;
+use Psr\Log\LoggerInterface;
 use Psr\SimpleCache\CacheInterface;
+use Psr\SimpleCache\InvalidArgumentException;
 use SilverStripe\Assets\Image;
 use SilverStripe\Assets\Storage\AssetContainer;
 use SilverStripe\Assets\Storage\AssetStore;
+use SilverStripe\Assets\Storage\DBFile;
 use SilverStripe\Core\Config\Config;
+use SilverStripe\Core\Extension;
 use SilverStripe\Core\Flushable;
 use SilverStripe\Core\Injector\Injector;
-use SilverStripe\ORM\ArrayList;
-use SilverStripe\ORM\DataExtension;
+use SilverStripe\Model\List\ArrayList;
 use SilverStripe\ORM\FieldType\DBField;
 
-class ImageExtension extends DataExtension implements Flushable
+/**
+ * @extends Extension<Image>
+ */
+class ImageExtension extends Extension implements Flushable
 {
     /**
      * default configuration
      * @config
      */
-    private static $rendering_classes = array(
+    private static array $rendering_classes = array(
         'default' => array(
             'sizes' => '100vw',
             'maxsteps' => 0,  // maxsteps is limiting the steps calculated by sizediff
@@ -35,31 +41,28 @@ class ImageExtension extends DataExtension implements Flushable
      * @config
      * @var int
      */
-    private static $minviewport = 320;
+    private static int $minviewport = 320;
 
     /**
      * Maximum viewport width to consider for CSS calculations
      * @config
      * @var int
      */
-    private static $maxviewport = 2560;
+    private static int $maxviewport = 2560;
 
     /**
      * Value to convert CSS rem to px
      * @config
      * @var int
      */
-    private static $remsize = 16;
+    private static int $remsize = 16;
 
-    private static $supported_extensions = array(
+    private static array $supported_extensions = array(
         // Todo: check extensions, e.g. webp
         "bmp" ,"gif" ,"jpg" ,"jpeg" ,"pcx" ,"tif" ,"png"
     );
 
-    /**
-     * @var CacheInterface
-     */
-    private $cache;
+    private ?CacheInterface $cache = null;
 
     /**
      * get a copy of this image for a specif rendering, usually connected with a css class
@@ -69,12 +72,13 @@ class ImageExtension extends DataExtension implements Flushable
      * @param $arguments
      * @return AssetContainer
      */
-    public function Rendering($arguments)
+    public function Rendering($arguments): AssetContainer
     {
         /*
             create a copy of this object (preventing to modify the original) and set arguments
-            Cmopare the end of ImageManipulation->manipulate(), but here we don’t do any actual processing yet
+            Compare the end of ImageManipulation->manipulate(), but here we don’t do any actual processing yet
         */
+        /* @var DBFile $copy */
         $copy = DBField::create_field('DBFile', [
             'Filename' => $this->owner->Filename,
             'Hash' => $this->owner->Hash,
@@ -93,9 +97,9 @@ class ImageExtension extends DataExtension implements Flushable
     /**
      * set the arguments
      * @param $arguments
-     * @return Image
+     * @return AssetContainer
      */
-    public function setArguments($arguments)
+    public function setArguments($arguments): AssetContainer
     {
         $this->owner->setDynamicData('imageExtensionArguments', $this->parseArgString($arguments));
         $this->invalidate();
@@ -105,7 +109,7 @@ class ImageExtension extends DataExtension implements Flushable
     /**
      * @return array
      */
-    public function getArguments()
+    public function getArguments(): array
     {
         $arguments = $this->owner->getDynamicData('imageExtensionArguments');
         return $arguments ?: [];
@@ -115,16 +119,16 @@ class ImageExtension extends DataExtension implements Flushable
      * get the all variant images, for use in advanced templates
      * @return ArrayList
      */
-    public function Variants()
+    public function Variants(): ArrayList
     {
         return ArrayList::create($this->getVariants());
     }
 
     /**
      * get the srcset attribute for HTML rendering, for use in templates
-     * @return string
+     * @return string|null
      */
-    public function Srcset()
+    public function Srcset(): ?string
     {
         if (!static::is_supported_filetype($this->owner)) {
             return null;
@@ -140,7 +144,7 @@ class ImageExtension extends DataExtension implements Flushable
      * array for all variant widths – mostly for testing
      * @return array
      */
-    public function VariantWidths()
+    public function VariantWidths(): array
     {
         $widths = [];
         foreach ($this->getVariants() as $img) {
@@ -151,9 +155,9 @@ class ImageExtension extends DataExtension implements Flushable
 
     /**
      * get the src attribute for HTML rendering, for use in templates
-     * @return string
+     * @return ?string
      */
-    public function Src()
+    public function Src(): ?string
     {
         if (count($this->getVariants()) == 0) {
             return null;
@@ -169,9 +173,9 @@ class ImageExtension extends DataExtension implements Flushable
     /**
      * get the class attribute for HTML rendering, for use in templates
      * could be multiple classes, spearated by whitespace
-     * @return string
+     * @return ?string
      */
-    public function Cssclass()
+    public function Cssclass(): ?string
     {
         if (array_key_exists('cssclass', $this->getArguments())) {
             return $this->getArguments()['cssclass'];
@@ -185,18 +189,18 @@ class ImageExtension extends DataExtension implements Flushable
 
     /**
      * get the user defined width for HTML rendering, for use in templates
-     * @return string
+     * @return ?string
      */
-    public function Userwidth()
+    public function Userwidth(): ?string
     {
         return array_key_exists('userwidth', $this->getArguments()) ? $this->getArguments()['userwidth'] : null;
     }
 
     /**
      * get an optional configured fallback width, used for unsupported file types (SVG) that can’t create a srcset attribute
-     * @return string
+     * @return ?string
      */
-    public function Fallbackwidth()
+    public function Fallbackwidth(): ?string
     {
         if (empty($this->Sizes())) {
             return $this->getRenderConfig()->getFallbackwidth();
@@ -206,21 +210,21 @@ class ImageExtension extends DataExtension implements Flushable
 
     /**
      * get the sizes attribute for HTML rendering, for use in templates
-     * @return string
+     * @return ?string
      */
-    public function Sizes()
+    public function Sizes(): ?string
     {
         if (!static::is_supported_filetype($this->owner)) {
             return "";
         }
-        return $this->getRenderConfig()->getSizesstring();
+        return $this->getRenderConfig()->getSizes();
     }
 
     /**
      * invalidate precalculated variants after arguments are set
      * mostly used for testing
      */
-    private function invalidate()
+    private function invalidate(): void
     {
         $this->owner->setDynamicData('imageExtensionVariants', array());
         $this->owner->setDynamicData('imageExtensionRenderConfig', array());
@@ -231,7 +235,7 @@ class ImageExtension extends DataExtension implements Flushable
      *
      * @return array
      */
-    private function getVariants()
+    private function getVariants(): array
     {
         // use cached variants if set already
         $variants = $this->owner->getDynamicData('imageExtensionVariants');
@@ -241,7 +245,7 @@ class ImageExtension extends DataExtension implements Flushable
             $variants = $this->fromCache();
         }
 
-        if (!is_array($variants) || (count($variants) == 0)) {
+        if ((count($variants) == 0)) {
             if (!$this->owner->exists()) {
                 return array($this->owner);
             }
@@ -268,7 +272,12 @@ class ImageExtension extends DataExtension implements Flushable
         return $variants;
     }
 
-    private function toCache(array $variants)
+    /**
+     * store variants in cache
+     * @param array $variants
+     * @return void
+     */
+    private function toCache(array $variants): void
     {
         $cachekey = $this->getCacheBaseKey() . "_variants";
         $data = [];
@@ -282,7 +291,11 @@ class ImageExtension extends DataExtension implements Flushable
         $this->getCache()->set($cachekey, $data);
     }
 
-    private function fromCache()
+    /**
+     * get variants from cache
+     * @return array
+     */
+    private function fromCache(): array
     {
         $cachekey = $this->getCacheBaseKey() . "_variants";
         $data = $this->getCache()->get($cachekey);
@@ -299,7 +312,7 @@ class ImageExtension extends DataExtension implements Flushable
                         // if something went wrong, abort and recalculate
                         return [];
                     }
-                } catch (\Exception $e) {
+                } catch (\Exception) {
                     return [];
                 }
             }
@@ -311,7 +324,7 @@ class ImageExtension extends DataExtension implements Flushable
      * get cache instance for calculated resolutions
      * @return CacheInterface
      */
-    public function getCache()
+    public function getCache(): CacheInterface
     {
         if (!$this->cache) {
             $this->cache = Injector::inst()->get(CacheInterface::class . '.MheImageExtension_variants');
@@ -319,7 +332,7 @@ class ImageExtension extends DataExtension implements Flushable
         return $this->cache;
     }
 
-    public static function flush()
+    public static function flush(): void
     {
         $cache = Injector::inst()->get(CacheInterface::class . '.MheImageExtension_variants');
         $cache->clear();
@@ -329,7 +342,7 @@ class ImageExtension extends DataExtension implements Flushable
      * get cache key for current source image and configuration arguments
      * @return string
      */
-    public function getCacheBaseKey()
+    public function getCacheBaseKey(): string
     {
         $key = hash_init('sha1');
         hash_update($key, $this->owner->getHash());
@@ -345,9 +358,9 @@ class ImageExtension extends DataExtension implements Flushable
      * get an enhanced RenderConfig from SilverStripe configuration
      * assuring valid values that can be handled without error
      *
-     * @return \Mhe\SmartImages\Model\RenderConfig
+     * @return RenderConfig
      */
-    private function getRenderConfig()
+    private function getRenderConfig(): RenderConfig
     {
         $renderConfig = $this->owner->getDynamicData('imageExtensionRenderConfig');
 
@@ -388,8 +401,8 @@ class ImageExtension extends DataExtension implements Flushable
             if (!array_key_exists('maxsteps', $config) || !is_numeric($config['maxsteps'])) {
                 $config['maxsteps'] = 0;
             }
-            if (!array_key_exists('sizediff', $config) && is_numeric($config['sizediff'])) {
-                $conf['sizediff'] = intval($config['sizediff']);
+            if (array_key_exists('sizediff', $config) && is_numeric($config['sizediff'])) {
+                $config['sizediff'] = intval($config['sizediff']);
             }
             if (array_key_exists('highres', $config) && is_numeric($config['highres'])) {
                 $config['highres'] = max(min(intval($config['highres']), 3), 1);
@@ -428,7 +441,7 @@ class ImageExtension extends DataExtension implements Flushable
      * @param $config
      * @return array|mixed
      */
-    private function parseConfigVariables($config)
+    private function parseConfigVariables($config): mixed
     {
         $arguments = $this->getArguments();
         if (!array_key_exists('userwidth', $arguments)) {
@@ -437,6 +450,7 @@ class ImageExtension extends DataExtension implements Flushable
         if (is_array($config)) {
             $config = array_map(array($this, 'parseConfigVariables'), $config);
         } elseif (is_string($config)) {
+            // ToDo: get rid of mixed return type (used for recursion)
             $config = str_replace('$USERWIDTH', $arguments["userwidth"], $config);
         }
         return $config;
@@ -450,7 +464,7 @@ class ImageExtension extends DataExtension implements Flushable
      * @param $argstr
      * @return array|bool
      */
-    private function parseArgString($argstr)
+    private function parseArgString($argstr): bool|array
     {
         if (is_array($argstr)) {
             return $argstr;
@@ -471,7 +485,7 @@ class ImageExtension extends DataExtension implements Flushable
         return $arguments;
     }
 
-    private static function is_supported_filetype($image)
+    private static function is_supported_filetype($image): bool
     {
         if (!$image || !$image->getExtension()) {
             return false;
