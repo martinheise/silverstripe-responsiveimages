@@ -4,7 +4,7 @@ namespace Mhe\SmartImages\Extensions;
 
 use Mhe\SmartImages\Model\RenderConfig;
 use Mhe\Imagetools\ImageResizer;
-use Psr\Container\NotFoundExceptionInterface;
+use Psr\Log\LoggerInterface;
 use Psr\SimpleCache\CacheInterface;
 use Psr\SimpleCache\InvalidArgumentException;
 use SilverStripe\Assets\Image;
@@ -276,7 +276,6 @@ class ImageExtension extends Extension implements Flushable
      * store variants in cache
      * @param array $variants
      * @return void
-     * @throws InvalidArgumentException
      */
     private function toCache(array $variants): void
     {
@@ -295,8 +294,6 @@ class ImageExtension extends Extension implements Flushable
     /**
      * get variants from cache
      * @return array
-     * @throws NotFoundExceptionInterface
-     * @throws InvalidArgumentException
      */
     private function fromCache(): array
     {
@@ -361,7 +358,7 @@ class ImageExtension extends Extension implements Flushable
      * get an enhanced RenderConfig from SilverStripe configuration
      * assuring valid values that can be handled without error
      *
-     * @return \Mhe\SmartImages\Model\RenderConfig
+     * @return RenderConfig
      */
     private function getRenderConfig(): RenderConfig
     {
@@ -404,8 +401,8 @@ class ImageExtension extends Extension implements Flushable
             if (!array_key_exists('maxsteps', $config) || !is_numeric($config['maxsteps'])) {
                 $config['maxsteps'] = 0;
             }
-            if (!array_key_exists('sizediff', $config) && is_numeric($config['sizediff'])) {
-                $conf['sizediff'] = intval($config['sizediff']);
+            if (array_key_exists('sizediff', $config) && is_numeric($config['sizediff'])) {
+                $config['sizediff'] = intval($config['sizediff']);
             }
             if (array_key_exists('highres', $config) && is_numeric($config['highres'])) {
                 $config['highres'] = max(min(intval($config['highres']), 3), 1);
