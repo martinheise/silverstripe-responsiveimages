@@ -97,19 +97,7 @@ SilverStripe\Assets\InterventionBackend:
     flush_enabled: true
 ```
 
-Using imagick backend if available is often much more performant and avoids memory issues:
-```
----
-Name: mysite-imagebackend
-Only:
-    extensionloaded: imagick
----
-SilverStripe\Core\Injector\Injector:
-    Intervention\Image\ImageManager:
-        constructor:
-            - { driver: imagick }
-```
-
+Using imagick backend is often much more performant and avoids memory issues – starting from Silverstripe 6 this is the default anyway if the imagick PHP extension is installed. For details see the [Silverstripe documentation](https://docs.silverstripe.org/en/6/developer_guides/files/images/#intervention-image-driver).
 
 ### Use in content
 
